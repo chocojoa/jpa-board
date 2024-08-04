@@ -1,6 +1,7 @@
 package com.lollipop.jpaboard.board.controller;
 
 import com.lollipop.jpaboard.board.dto.BoardDTO;
+import com.lollipop.jpaboard.board.dto.BoardSearchCriteria;
 import com.lollipop.jpaboard.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,8 @@ public class BoardController {
     private final BoardService boardService;
 
     @GetMapping
-    public List<BoardDTO> getBoards() {
-        return boardService.getAllBoards();
+    public List<BoardDTO> getBoards(BoardSearchCriteria criteria) {
+        return boardService.getAllBoards(criteria);
     }
 
     @GetMapping("/{id}")

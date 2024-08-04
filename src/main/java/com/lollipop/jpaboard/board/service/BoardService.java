@@ -1,10 +1,16 @@
 package com.lollipop.jpaboard.board.service;
 
 import com.lollipop.jpaboard.board.dto.BoardDTO;
+import com.lollipop.jpaboard.board.dto.BoardSearchCriteria;
 import com.lollipop.jpaboard.board.entity.Board;
 import com.lollipop.jpaboard.board.repository.BoardRepository;
+import com.lollipop.jpaboard.board.specification.BoardSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,8 +22,18 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
 
-    public List<BoardDTO> getAllBoards() {
-        return boardRepository.findAll().stream().map(this::convertEntityToDto).collect(Collectors.toList());
+    public List<BoardDTO> getAllBoards(BoardSearchCriteria criteria) {
+        Pageable pageable = PageRequest.of(criteria.getPage(), criteria.getSize());
+        Specification<Board> spec = Specification.where(null);
+
+        if(StringUtils.hasText(criteria.getTitle())) {
+            spec = spec.and(BoardSpecification.titleContains(criteria.getTitle()));
+        }
+
+        if(StringUtils.hasText(criteria.getAuthor())) {
+            spec = spec.and(BoardSpecification.authorContains(criteria.getAuthor()));
+        }
+        return boardRepository.findAll(spec, pageable).stream().map(this::convertEntityToDto).collect(Collectors.toList());
     }
 
     public Optional<BoardDTO> getBoardById(Long id) {
