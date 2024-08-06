@@ -5,7 +5,10 @@ import com.lollipop.jpaboard.board.dto.BoardSearchCriteria;
 import com.lollipop.jpaboard.board.entity.Board;
 import com.lollipop.jpaboard.board.repository.BoardRepository;
 import com.lollipop.jpaboard.board.specification.BoardSpecification;
+import com.lollipop.jpaboard.user.entity.User;
+import com.lollipop.jpaboard.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,7 +25,9 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
 
-    public List<BoardDTO> getAllBoards(BoardSearchCriteria criteria) {
+    private final UserRepository userRepository;
+
+    public Page<BoardDTO> getAllBoards(BoardSearchCriteria criteria) {
         Pageable pageable = PageRequest.of(criteria.getPage(), criteria.getSize());
         Specification<Board> spec = Specification.where(null);
 
@@ -31,9 +36,9 @@ public class BoardService {
         }
 
         if(StringUtils.hasText(criteria.getAuthor())) {
-            spec = spec.and(BoardSpecification.authorContains(criteria.getAuthor()));
+            spec = spec.and(BoardSpecification.usernameContains(criteria.getAuthor()));
         }
-        return boardRepository.findAll(spec, pageable).stream().map(this::convertEntityToDto).collect(Collectors.toList());
+        return boardRepository.findAll(spec, pageable).map(this::convertEntityToDto);
     }
 
     public Optional<BoardDTO> getBoardById(Long id) {
@@ -44,7 +49,9 @@ public class BoardService {
         Board board = new Board();
         board.setTitle(boardDTO.getTitle());
         board.setContent(boardDTO.getContent());
-        board.setAuthor(boardDTO.getAuthor());
+        User user = userRepository.findById(boardDTO.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        board.setUser(user);
         Board savedBoard = boardRepository.save(board);
         return convertEntityToDto(savedBoard);
     }
@@ -53,7 +60,9 @@ public class BoardService {
         return boardRepository.findById(id).map(board -> {
             board.setTitle(boardDTO.getTitle());
             board.setContent(boardDTO.getContent());
-            board.setAuthor(boardDTO.getAuthor());
+            User user = userRepository.findById(boardDTO.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            board.setUser(user);
             Board updateBoard = boardRepository.save(board);
             return convertEntityToDto(updateBoard);
         });
@@ -68,7 +77,8 @@ public class BoardService {
         boardDTO.setId(board.getId());
         boardDTO.setTitle(board.getTitle());
         boardDTO.setContent(board.getContent());
-        boardDTO.setAuthor(board.getAuthor());
+        boardDTO.setUserId(board.getUser().getId());
+        boardDTO.setUsername(board.getUser().getUsername());
         boardDTO.setCreatedAt(board.getCreatedAt());
         boardDTO.setUpdatedAt(board.getUpdatedAt());
         return boardDTO;

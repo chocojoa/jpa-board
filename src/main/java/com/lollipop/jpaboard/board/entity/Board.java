@@ -1,5 +1,6 @@
 package com.lollipop.jpaboard.board.entity;
 
+import com.lollipop.jpaboard.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +24,9 @@ public class Board {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private String author;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

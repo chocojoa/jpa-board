@@ -1,4 +1,4 @@
-package com.lollipop.jpaboard.board.dto;
+package com.lollipop.jpaboard.user.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,13 +7,12 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class BoardDTO {
+public class UserDTO {
 
     private Long id;
-    private String title;
-    private String content;
-    private Long userId;
     private String username;
+    private String email;
+    private String password;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

@@ -10,9 +10,9 @@ public class BoardSpecification {
                 criteriaBuilder.like(root.get("title"), "%" + title + "%");
     }
 
-    public static Specification<Board> authorContains(String author) {
+    public static Specification<Board> usernameContains(String username) {
         return (root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get("author"), "%" + author + "%");
+                criteriaBuilder.like(root.get("username"), "%" + username + "%");
     }
 
 }
